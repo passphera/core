@@ -5,14 +5,14 @@ with open("README.md", "r") as fh:
 
 setup(
     name='passphera-core',
-    version='0.0.1',
+    version='0.1.0',
     author='Fathi Abdelmalek',
     author_email='abdelmalek.fathi.2001@gmail.com',
     url='',
     description='',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=[''],
+    packages=['passphera_core'],
     classifiers=[
         "Development Status :: 1 - Planning",
         "License :: OSI Approved :: MIT License",

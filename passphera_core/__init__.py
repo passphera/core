@@ -1,6 +1,9 @@
 from cipherspy.cipher import *
 
-from .exceptions import InvalidAlgorithmException
+
+class InvalidAlgorithmException(Exception):
+    def __init__(self, algorithm: str) -> None:
+        super().__init__(f"Invalid algorithm name {algorithm}")
 
 
 class PasswordGenerator:
@@ -10,7 +13,7 @@ class PasswordGenerator:
             shift: int = 3,
             multiplier: int = 3,
             key_str: str = "secret",
-            key_iter: iter = None,
+            key_iter: iter = (9, 4, 5, 7),
             algorithm: str = 'playfair'
     ):
         self._char_replacements: dict = {}
@@ -85,7 +88,7 @@ class PasswordGenerator:
                 return PlayfairCipher(self._key_str)
             case 'hill':
                 return HillCipher(self._key_iter)
-            case '_':
+            case _:
                 raise InvalidAlgorithmException(self._algorithm_name)
 
     def _update_algorithm_properties(self) -> None:

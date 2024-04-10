@@ -229,3 +229,6 @@ class PasswordGenerator:
             if char in self._text:
                 self._password = self._text.replace(char, char.upper())
         return self._password
+
+
+__all__ = ['PasswordGenerator', 'InvalidAlgorithmException']

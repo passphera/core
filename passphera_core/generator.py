@@ -219,10 +219,9 @@ class PasswordGenerator:
         """
         old_algorithm = self._algorithm_name
         self._algorithm_name = 'affine'
-        self._update_algorithm_properties()
         self._password = self.generate_raw_password()
         self._algorithm_name = old_algorithm
-        self._update_algorithm_properties()
+        self._password = self.generate_raw_password()
         for char, replacement in self._chars_replacements.items():
             self._password = self._password.replace(char, replacement)
         for char in self._password:

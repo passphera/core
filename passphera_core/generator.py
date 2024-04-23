@@ -222,9 +222,9 @@ class PasswordGenerator:
         self._password = self.generate_raw_password()
         self._algorithm_name = old_algorithm
         self._password = self.generate_raw_password()
-        for char, replacement in self._chars_replacements.items():
-            self._password = self._password.replace(char, replacement)
         for char in self._password:
             if char in self._text:
                 self._password = self._password.replace(char, char.upper())
+        for char, replacement in self._chars_replacements.items():
+            self._password = self._password.replace(char, replacement)
         return self._password

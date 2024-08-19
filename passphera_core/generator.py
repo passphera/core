@@ -9,26 +9,30 @@ class PasswordGenerator:
     """
     def __init__(
             self,
-            text: str = None,
             shift: int = 3,
             multiplier: int = 3,
             key: str = "hill",
-            algorithm: str = 'hill'
+            algorithm: str = 'hill',
+            characters_replacements: dict = None,
+            text: str = None,
     ):
         """
-        :param text: plain text to be ciphered
         :param shift: number of characters to shift each character (default 3)
         :param multiplier: number of characters to shift each character (default 3)
         :param key: cipher key string (default "secret")
         :param algorithm: main cipher algorithm name (default 'playfair')
+        :param characters_replacements: replace characters with the given values (default {})
+        :param text: plain text to be ciphered
         """
-        self._chars_replacements: dict = {}
-        self._text: str = text
+        if characters_replacements is None:
+            characters_replacements = {}
         self._shift: int = shift
         self._multiplier: int = multiplier
         self._key: str = key
         self._algorithm_name: str = algorithm.lower()
         self._algorithm = self._set_algorithm()
+        self._characters_replacements: dict = characters_replacements
+        self._text: str = text
         if text:
             self._password: str = f"secret{self._text.replace(' ', '')}secret"
         else:
@@ -138,7 +142,7 @@ class PasswordGenerator:
         Eg: ```print(pg.characters_replacements)  # {'a': '@1', 'b': '#2'}```
         :return: dict: The dictionary of the characters replacements
         """
-        return self._chars_replacements
+        return self._characters_replacements
 
     def _set_algorithm(self):
         """
@@ -171,7 +175,7 @@ class PasswordGenerator:
         :param replacement: The (character|set of characters) to replace the first one
         :return:
         """
-        self._chars_replacements[char[0]] = replacement
+        self._characters_replacements[char[0]] = replacement
 
     def reset_character(self, char: str) -> None:
         """
@@ -179,8 +183,8 @@ class PasswordGenerator:
         :param char: The character to be reset to its original value
         :return:
         """
-        if char in self._chars_replacements:
-            del self._chars_replacements[char]
+        if char in self._characters_replacements:
+            del self._characters_replacements[char]
 
     def generate_raw_password(self) -> str:
         """
@@ -203,6 +207,6 @@ class PasswordGenerator:
         for char in self._password:
             if char in self._text:
                 self._password = self._password.replace(char, char.upper())
-        for char, replacement in self._chars_replacements.items():
+        for char, replacement in self._characters_replacements.items():
             self._password = self._password.replace(char, replacement)
         return self._password

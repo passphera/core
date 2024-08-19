@@ -12,24 +12,21 @@ class PasswordGenerator:
             text: str = None,
             shift: int = 3,
             multiplier: int = 3,
-            key_str: str = "secret",
-            key_iter: iter = (9, 4, 5, 7),
-            algorithm: str = 'playfair'
+            key: str = "hill",
+            algorithm: str = 'hill'
     ):
         """
         :param text: plain text to be ciphered
         :param shift: number of characters to shift each character (default 3)
         :param multiplier: number of characters to shift each character (default 3)
-        :param key_str: cipher key string (default "secret")
-        :param key_iter: cipher key matrix (default (9, 4, 5, 7))
+        :param key: cipher key string (default "secret")
         :param algorithm: main cipher algorithm name (default 'playfair')
         """
         self._chars_replacements: dict = {}
         self._text: str = text
         self._shift: int = shift
         self._multiplier: int = multiplier
-        self._key_str: str = key_str
-        self._key_iter: iter = key_iter
+        self._key: str = key
         self._algorithm_name: str = algorithm.lower()
         self._algorithm = self._set_algorithm()
         if text:
@@ -96,42 +93,23 @@ class PasswordGenerator:
         self._multiplier = multiplier
 
     @property
-    def key_str(self) -> str:
+    def key(self) -> str:
         """
         Returns the key string for the cipher algorithm
         Eg: ```key_str = pg.key_str```
         :return: str: The key string for the cipher algorithm
         """
-        return self._key_str
+        return self._key
 
-    @key_str.setter
-    def key_str(self, key_str: str) -> None:
+    @key.setter
+    def key(self, key: str) -> None:
         """
         Sets the key string for the cipher algorithm
-        Eg: ```pg.key_str = 'secret key'```
-        :param key_str: The key string for the cipher algorithm
+        Eg: ```pg.key = 'secret key'```
+        :param key: The key string for the cipher algorithm
         :return:
         """
-        self._key_str = key_str
-
-    @property
-    def key_iter(self) -> iter:
-        """
-        Returns the key matrix for the cipher algorithm
-        Eg: ```key_iter = pg.key_iter```
-        :return: iter: The key matrix for the cipher algorithm
-        """
-        return self._key_iter
-
-    @key_iter.setter
-    def key_iter(self, key_iter: iter) -> None:
-        """
-        Sets the key matrix for the cipher algorithm
-        Eg: ```pg.key_iter = (9, 5, 2, 4)```
-        :param key_iter: The key matrix for the cipher algorithm
-        :return:
-        """
-        self._key_iter = key_iter
+        self._key = key
 
     @property
     def algorithm(self) -> str:
@@ -173,9 +151,9 @@ class PasswordGenerator:
             case 'affine':
                 return AffineCipher(self._multiplier, self._shift)
             case 'playfair':
-                return PlayfairCipher(self._key_str)
+                return PlayfairCipher(self._key)
             case 'hill':
-                return HillCipher(self._key_iter)
+                return HillCipher(self._key)
             case _:
                 raise InvalidAlgorithmException(self._algorithm_name)
 

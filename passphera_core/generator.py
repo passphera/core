@@ -14,7 +14,6 @@ class PasswordGenerator:
             key: str = "hill",
             algorithm: str = 'hill',
             characters_replacements: dict = None,
-            text: str = None,
     ):
         """
         :param shift: number of characters to shift each character (default 3)
@@ -32,31 +31,6 @@ class PasswordGenerator:
         self._algorithm_name: str = algorithm.lower()
         self._algorithm = self._set_algorithm()
         self._characters_replacements: dict = characters_replacements
-        self._text: str = text
-        if text:
-            self._password: str = f"secret{self._text.replace(' ', '')}secret"
-        else:
-            self._password: str = f'secret'
-
-    @property
-    def text(self) -> str:
-        """
-        Returns the text to be ciphered into a password
-        Eg: ```password = pg.text```
-        :return: str: The text to be ciphered into a password
-        """
-        return self._text
-
-    @text.setter
-    def text(self, text: str) -> None:
-        """
-        Sets the text to be ciphered into a password
-        Eg: ```pg.text = 'secret 2024 password'```
-        :param text: The text to be ciphered into a password
-        :return:
-        """
-        self._text = text
-        self._password: str = f"secret{self._text.replace(' ', '')}secret"
 
     @property
     def shift(self) -> int:
@@ -186,27 +160,27 @@ class PasswordGenerator:
         if char in self._characters_replacements:
             del self._characters_replacements[char]
 
-    def generate_raw_password(self) -> str:
+    def generate_raw_password(self, text: str) -> str:
         """
         Generate a raw password string using the given parameters
         :return: str: The generated raw password
         """
         self._update_algorithm_properties()
-        return self._algorithm.encrypt(self._password)
+        return self._algorithm.encrypt(f"secret{text}secret")
 
-    def generate_password(self) -> str:
+    def generate_password(self, text: str) -> str:
         """
         Generate a strong password string using the raw password (add another layer of encryption to it)
         :return: str: The generated strong password
         """
         old_algorithm = self._algorithm_name
         self._algorithm_name = 'affine'
-        self._password = self.generate_raw_password()
+        password = self.generate_raw_password(text)
         self._algorithm_name = old_algorithm
-        self._password = self.generate_raw_password()
-        for char in self._password:
-            if char in self._text:
-                self._password = self._password.replace(char, char.upper())
+        password = self.generate_raw_password(password)
+        for char in password:
+            if char in text:
+                password = password.replace(char, char.upper())
         for char, replacement in self._characters_replacements.items():
-            self._password = self._password.replace(char, replacement)
-        return self._password
+            password = password.replace(char, replacement)
+        return password

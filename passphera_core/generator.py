@@ -13,6 +13,8 @@ class PasswordGenerator:
             multiplier: int = 3,
             key: str = "hill",
             algorithm: str = 'hill',
+            prefix: str = 'secret',
+            postfix: str = 'secret',
             characters_replacements: dict = None,
     ):
         """
@@ -30,6 +32,8 @@ class PasswordGenerator:
         self._key: str = key
         self._algorithm_name: str = algorithm.lower()
         self._algorithm = self._set_algorithm()
+        self._prefix: str = prefix
+        self._postfix: str = postfix
         self._characters_replacements: dict = characters_replacements
 
     @property
@@ -127,7 +131,7 @@ class PasswordGenerator:
             case 'caesar':
                 return CaesarCipher(self._shift)
             case 'affine':
-                return AffineCipher(self._multiplier, self._shift)
+                return AffineCipher(self._shift, self._multiplier)
             case 'playfair':
                 return PlayfairCipher(self._key)
             case 'hill':
@@ -166,7 +170,7 @@ class PasswordGenerator:
         :return: str: The generated raw password
         """
         self._update_algorithm_properties()
-        return self._algorithm.encrypt(f"secret{text}secret")
+        return self._algorithm.encrypt(f"{self._prefix}{text}{self._postfix}")
 
     def generate_password(self, text: str) -> str:
         """

@@ -178,9 +178,9 @@ class PasswordGenerator:
         password = self.generate_raw_password(text)
         self._algorithm_name = old_algorithm
         password = self.generate_raw_password(password)
+        for char, replacement in self._characters_replacements.items():
+            password = password.replace(char, replacement)
         for char in password:
             if char in text:
                 password = password.replace(char, char.upper())
-        for char, replacement in self._characters_replacements.items():
-            password = password.replace(char, replacement)
         return password

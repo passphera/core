@@ -78,7 +78,7 @@ class PasswordGenerator:
     def key(self) -> str:
         """
         Returns the key string for the cipher algorithm
-        Eg: ```key_str = pg.key_str```
+        Eg: ```key = pg.key```
         :return: str: The key string for the cipher algorithm
         """
         return self._key
@@ -92,6 +92,44 @@ class PasswordGenerator:
         :return:
         """
         self._key = key
+
+    @property
+    def prefix(self) -> str:
+        """
+        Returns the prefix string for the cipher algorithm
+        Eg: ```prefix = pg.prefix```
+        :return: str: The prefix string for the cipher algorithm
+        """
+        return self._prefix
+
+    @prefix.setter
+    def prefix(self, prefix: str):
+        """
+        Sets the prefix string for the cipher algorithm
+        Eg: ```pg.prefix = 'something'```
+        :param prefix: The string for the cipher algorithm
+        :return:
+        """
+        self._prefix = prefix
+
+    @property
+    def postfix(self) -> str:
+        """
+        Returns the postfix string for the cipher algorithm
+        Eg: ```postfix = pg.postfix```
+        :return: str: The postfix string for the cipher algorithm
+        """
+        return self._postfix
+
+    @postfix.setter
+    def postfix(self, postfix: str):
+        """
+        Sets the postfix string for the cipher algorithm
+        Eg: ```pg.postfix = 'something'```
+        :param postfix: The string for the cipher algorithm
+        :return:
+        """
+        self._postfix = postfix
 
     @property
     def algorithm(self) -> str:

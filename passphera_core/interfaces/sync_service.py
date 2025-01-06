@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from passphera.entities.password import Password
+from passphera_core.entities.password import Password
 
 class SyncServiceInterface(ABC):
     @abstractmethod

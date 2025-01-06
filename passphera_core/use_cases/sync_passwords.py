@@ -1,5 +1,5 @@
-from passphera.interfaces.sync_service import SyncServiceInterface
-from passphera.interfaces.database import DatabaseInterface
+from passphera_core.interfaces.sync_service import SyncServiceInterface
+from passphera_core.interfaces.database import DatabaseInterface
 
 class SyncPasswordsUseCase:
     def __init__(self, database: DatabaseInterface, sync_service: SyncServiceInterface):

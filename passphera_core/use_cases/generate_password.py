@@ -1,5 +1,5 @@
-from passphera.entities.password import Password
-from passphera.interfaces.database import DatabaseInterface
+from passphera_core.entities.password import Password
+from passphera_core.interfaces.database import DatabaseInterface
 
 class GeneratePasswordUseCase:
     def __init__(self, database: DatabaseInterface):

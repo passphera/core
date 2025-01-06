@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from passphera.entities.user import User
+from passphera_core.entities.user import User
 
 class DatabaseInterface(ABC):
     @abstractmethod

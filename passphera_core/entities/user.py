@@ -1,23 +1,18 @@
+from dataclasses import dataclass, field
 from uuid import UUID, uuid4
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import datetime
 
+from passphera_core.entities.generator import Generator
+from passphera_core.entities.password import Password
+
+
+@dataclass
 class User:
-    def __init__(self, id: UUID = None, email: str = None, username: str = None):
-        self.id = id or uuid4()
-        self.email = email
-        self.username = username
-        self.created_at = datetime.now(timezone.utc)
-        self.updated_at = datetime.now(timezone.utc)
-        self.passwords: List["Password"] = []
-        self.generator: Optional["Generator"] = None
-
-    def update_email(self, new_email: str):
-        if "@" not in new_email:
-            raise ValueError("Invalid email address")
-        self.email = new_email
-        self.updated_at = datetime.now(timezone.utc)
-
-    def add_password(self, password: "Password"):
-        self.passwords.append(password)
-        self.updated_at = datetime.now(timezone.utc)
+    id: UUID = field(default_factory=uuid4)
+    created_at: datetime = field(default_factory=datetime.now)
+    updated_at: datetime = field(default_factory=datetime.now)
+    username: str = field(default_factory=str)
+    email: str = field(default_factory=str)
+    password: str = field(default_factory=str)
+    generator: Generator = field(default_factory=Generator)
+    passwords: list[Password] = field(default_factory=list[Password])

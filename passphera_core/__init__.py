@@ -1,2 +1,2 @@
-from passphera_core.generator import PasswordGenerator
+from passphera_core.entities.generator import Generator
 from passphera_core.exceptions import InvalidAlgorithmException

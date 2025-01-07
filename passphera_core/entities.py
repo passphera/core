@@ -6,8 +6,9 @@ from cryptography.fernet import Fernet
 
 from cipherspy.cipher import *
 from cipherspy.cipher.base_cipher import BaseCipherAlgorithm
+from cipherspy.utilities import generate_salt, derive_key
 
-from passphera_core import security, exceptions
+from passphera_core import exceptions
 
 
 @dataclass
@@ -22,12 +23,12 @@ class Password:
     salt: bytes = field(default_factory=bytes)
 
     def encrypt(self) -> None:
-        self.salt = security.generate_salt()
-        key = security.derive_key(self.password, self.salt)
+        self.salt = generate_salt()
+        key = derive_key(self.password, self.salt)
         self.password = Fernet(key).encrypt(self.password.encode()).decode()
 
     def decrypt(self) -> str:
-        key = security.derive_key(self.password, self.salt)
+        key = derive_key(self.password, self.salt)
         return Fernet(key).decrypt(self.password.encode()).decode()
 
 
@@ -114,5 +115,11 @@ class User:
     username: str = field(default_factory=str)
     email: str = field(default_factory=str)
     password: str = field(default_factory=str)
-    generator: Generator = field(default_factory=Generator)
-    passwords: list[Password] = field(default_factory=list[Password])
+    generator: UUID = field(default_factory=UUID)
+    passwords: list[UUID] = field(default_factory=list[UUID])
+
+    def add_password(self, password_id: UUID) -> None:
+        self.passwords.append(password_id)
+
+    def delete_password(self, password_id: UUID) -> None:
+        self.passwords.remove(password_id)

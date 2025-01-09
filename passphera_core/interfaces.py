@@ -39,6 +39,10 @@ class GeneratorRepository(ABC):
     def find_by_id(self, generator_id: UUID) -> Generator:
         pass
 
+    @abstractmethod
+    def find_by_user_id(self, user_id: UUID) -> Generator:
+        pass
+
 
 class GeneratorConfigRepository(ABC):
     @abstractmethod
@@ -55,6 +59,10 @@ class GeneratorConfigRepository(ABC):
 
     @abstractmethod
     def find_by_id(self, generator_config_id: UUID) -> GeneratorConfig:
+        pass
+
+    @abstractmethod
+    def find_by_generator_id(self, generator_id: UUID) -> GeneratorConfig:
         pass
 
 

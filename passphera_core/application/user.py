@@ -23,14 +23,6 @@ class RegisterUserUseCase:
         return user_entity
 
 
-class AuthenticateUserUseCase:
-    def __init__(self, user_repository: UserRepository):
-        self.user_repository: UserRepository = user_repository
-
-    def execute(self):
-        pass
-
-
 class GetUserByIdUseCase:
     def __init__(self, user_repository: UserRepository):
         self.user_repository: UserRepository = user_repository

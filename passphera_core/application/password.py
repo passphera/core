@@ -1,7 +1,8 @@
-from logging import raiseExceptions
+from datetime import datetime, timezone
 from uuid import UUID
 
 from passphera_core.entities import Password, Generator, User
+from passphera_core.exceptions import EntityNotFoundException
 from passphera_core.interfaces import PasswordRepository, GeneratorRepository, UserRepository
 
 
@@ -23,7 +24,7 @@ class GeneratePasswordUseCase:
         password_entity: Password = Password(user_id=user_id, context=context, text=text, password=password)
         password_entity.encrypt()
         self.password_repository.save(password_entity)
-        user_entity.add_password(password_entity)
+        user_entity.add_password(password_entity.id)
         self.user_repository.update(user_entity)
         return password_entity
 
@@ -35,7 +36,7 @@ class GetPasswordByIdUseCase:
     def execute(self, password_id: UUID) -> Password:
         password_entity: Password = self.password_repository.find_by_id(password_id)
         if not password_entity:
-            raise ValueError('Password not found')
+            raise EntityNotFoundException(password_entity)
         return password_entity
 
 
@@ -50,7 +51,7 @@ class GetPasswordByContextUseCase:
             password_entity: Password = self.password_repository.find_by_id(password_id)
             if password_entity.context == context:
                 return password_entity
-        raise ValueError('Password not found')
+        raise EntityNotFoundException(Password())
 
 
 class UpdatePasswordUseCase:
@@ -72,9 +73,10 @@ class UpdatePasswordUseCase:
             if password_entity.context == context:
                 password_entity.password = generator_entity.generate_password(text)
                 password_entity.encrypt()
+                password_entity.updated_at = datetime.now(timezone.utc)
                 self.password_repository.update(password_entity)
                 return password_entity
-        raise ValueError('Password not found')
+        raise EntityNotFoundException(Password())
 
 
 class DeletePasswordUseCase:
@@ -114,12 +116,3 @@ class DeleteAllUserPasswordsUseCase:
             self.password_repository.delete(password_id)
             user_entity.delete_password(password_id)
         self.user_repository.update(user_entity)
-
-
-class SyncUserPasswordsUseCase:
-    def __init__(self, password_repository: PasswordRepository, user_repository: UserRepository):
-        self.password_repository: PasswordRepository = password_repository
-        self.user_repository: UserRepository = user_repository
-
-    def execute(self, user_id: UUID, passwords_list: list[Password]) -> None:
-        pass

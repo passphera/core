@@ -71,7 +71,7 @@ class GeneratorConfig:
 
     def reset_character(self, char: str) -> None:
         """
-        Reset a character to it's original value (remove it's replacement from characters_replacements)
+        Reset a character to its original value (remove its replacement from characters_replacements)
         :param char: The character to be reset to its original value
         :return:
         """

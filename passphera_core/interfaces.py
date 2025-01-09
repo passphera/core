@@ -21,10 +21,6 @@ class PasswordRepository(ABC):
     def find_by_id(self, password_id: UUID) -> Password:
         pass
 
-    @abstractmethod
-    def find_by_context(self, password_context: str) -> Password:
-        pass
-
 
 class GeneratorRepository(ABC):
     @abstractmethod
@@ -81,4 +77,8 @@ class UserRepository(ABC):
 
     @abstractmethod
     def find_by_username(self, username: str) -> User:
+        pass
+
+    @abstractmethod
+    def find_by_email(self, email: str) -> User:
         pass

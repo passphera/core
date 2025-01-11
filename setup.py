@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -12,7 +12,7 @@ setup(
     description='The core system of passphera project',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=['passphera_core'],
+    packages=find_packages(),
     python_requires='>=3',
     install_requires=['cipherspy'],
     classifiers=[

@@ -16,7 +16,7 @@ setup(
     python_requires='>=3',
     install_requires=['cipherspy'],
     classifiers=[
-        "Development Status :: 2 - Alpha",
+        "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",

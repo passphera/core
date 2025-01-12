@@ -18,7 +18,7 @@ class RegisterUserUseCase:
         user_entity: User = User(**user.__dict__)
         generator_entity: Generator = Generator(user_id=user_entity.id)
         self.generator_repository.save(generator_entity)
-        user_entity.generator = generator_entity.id
+        user_entity.generator_id = generator_entity.id
         self.user_repository.save(user_entity)
         return user_entity
 

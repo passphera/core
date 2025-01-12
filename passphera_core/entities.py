@@ -84,7 +84,11 @@ class Generator:
     user_id: UUID = field(default_factory=uuid4)
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
+    config_id: UUID = field(default_factory=UUID)
     config: GeneratorConfig = field(default_factory=GeneratorConfig)
+    
+    def __post_init__(self):
+        self.config = GeneratorConfig(generator_id=self.id)
 
     def apply_replacements(self, password: str) -> str:
         """
@@ -115,11 +119,11 @@ class User:
     username: str = field(default_factory=str)
     email: str = field(default_factory=str)
     password: str = field(default_factory=str)
-    generator: UUID = field(default_factory=UUID)
-    passwords: list[UUID] = field(default_factory=list[UUID])
+    generator_id: UUID = field(default_factory=UUID)
+    passwords_ids: list[UUID] = field(default_factory=list[UUID])
 
     def add_password(self, password_id: UUID) -> None:
-        self.passwords.append(password_id)
+        self.passwords_ids.append(password_id)
 
     def delete_password(self, password_id: UUID) -> None:
-        self.passwords.remove(password_id)
+        self.passwords_ids.remove(password_id)

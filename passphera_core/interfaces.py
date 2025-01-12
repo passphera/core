@@ -32,10 +32,6 @@ class GeneratorRepository(ABC):
         pass
 
     @abstractmethod
-    def delete(self, generator_id: UUID) -> None:
-        pass
-
-    @abstractmethod
     def find_by_id(self, generator_id: UUID) -> Generator:
         pass
 
@@ -54,10 +50,6 @@ class GeneratorConfigRepository(ABC):
         pass
 
     @abstractmethod
-    def delete(self, generator_config_id: UUID) -> None:
-        pass
-
-    @abstractmethod
     def find_by_id(self, generator_config_id: UUID) -> GeneratorConfig:
         pass
 
@@ -73,10 +65,6 @@ class UserRepository(ABC):
 
     @abstractmethod
     def update(self, user: User) -> None:
-        pass
-
-    @abstractmethod
-    def delete(self, user_id: UUID) -> None:
         pass
 
     @abstractmethod

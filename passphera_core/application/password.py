@@ -1,9 +1,8 @@
-from datetime import datetime, timezone
 from uuid import UUID
 
-from passphera_core.entities import Password, Generator, User
-from passphera_core.exceptions import EntityNotFoundException
-from passphera_core.interfaces import PasswordRepository, GeneratorRepository, UserRepository
+from passphera_core.entities import Password, Generator
+from passphera_core.exceptions import DuplicatePasswordException, PasswordNotFoundException
+from passphera_core.interfaces import PasswordRepository, GeneratorRepository
 
 
 class GeneratePasswordUseCase:
@@ -11,47 +10,31 @@ class GeneratePasswordUseCase:
             self,
             password_repository: PasswordRepository,
             generator_repository: GeneratorRepository,
-            user_repository: UserRepository
     ):
         self.password_repository: PasswordRepository = password_repository
         self.generator_repository: GeneratorRepository = generator_repository
-        self.user_repository: UserRepository = user_repository
 
-    def execute(self, user_id: UUID, context: str, text: str) -> Password:
-        user_entity: User = self.user_repository.find_by_id(user_id)
-        generator_entity: Generator = self.generator_repository.find_by_id(user_entity.generator)
+    def execute(self, generator_id: UUID, context: str, text: str) -> Password:
+        password_entity: Password = self.password_repository.get_by_context(context)
+        if password_entity:
+            raise DuplicatePasswordException(password_entity)
+        generator_entity: Generator = self.generator_repository.get(generator_id)
         password: str = generator_entity.generate_password(text)
-        password_entity: Password = Password(user_id=user_id, context=context, text=text, password=password)
+        password_entity: Password = Password(context=context, text=text, password=password)
         password_entity.encrypt()
         self.password_repository.save(password_entity)
-        user_entity.add_password(password_entity.id)
-        self.user_repository.update(user_entity)
-        return password_entity
-
-
-class GetPasswordByIdUseCase:
-    def __init__(self, password_repository: PasswordRepository):
-        self.password_repository: PasswordRepository = password_repository
-
-    def execute(self, password_id: UUID) -> Password:
-        password_entity: Password = self.password_repository.find_by_id(password_id)
-        if not password_entity:
-            raise EntityNotFoundException(password_entity)
         return password_entity
 
 
 class GetPasswordByContextUseCase:
-    def __init__(self, password_repository: PasswordRepository, user_repository: UserRepository):
+    def __init__(self, password_repository: PasswordRepository):
         self.password_repository: PasswordRepository = password_repository
-        self.user_repository: UserRepository = user_repository
 
-    def execute(self, user_id: UUID, context: str) -> Password:
-        user_entity: User = self.user_repository.find_by_id(user_id)
-        for password_id in user_entity.passwords:
-            password_entity: Password = self.password_repository.find_by_id(password_id)
-            if password_entity.context == context:
-                return password_entity
-        raise EntityNotFoundException(Password())
+    def execute(self, context: str) -> Password:
+        password_entity: Password = self.password_repository.get_by_context(context)
+        if not password_entity:
+            raise PasswordNotFoundException()
+        return password_entity
 
 
 class UpdatePasswordUseCase:
@@ -59,60 +42,45 @@ class UpdatePasswordUseCase:
             self,
             password_repository: PasswordRepository,
             generator_repository: GeneratorRepository,
-            user_repository: UserRepository
     ):
         self.password_repository: PasswordRepository = password_repository
         self.generator_repository: GeneratorRepository = generator_repository
-        self.user_repository: UserRepository = user_repository
 
-    def execute(self, user_id: UUID, context: str, text: str) -> Password:
-        user_entity: User = self.user_repository.find_by_id(user_id)
-        generator_entity: Generator = self.generator_repository.find_by_id(user_entity.generator)
-        for password_id in user_entity.passwords:
-            password_entity: Password = self.password_repository.find_by_id(password_id)
-            if password_entity.context == context:
-                password_entity.password = generator_entity.generate_password(text)
-                password_entity.encrypt()
-                password_entity.updated_at = datetime.now(timezone.utc)
-                self.password_repository.update(password_entity)
-                return password_entity
-        raise EntityNotFoundException(Password())
+    def execute(self, generator_id: UUID, context: str, text: str) -> Password:
+        password_entity: Password = self.password_repository.get_by_context(context)
+        if not password_entity:
+            raise PasswordNotFoundException()
+        generator_entity: Generator = self.generator_repository.get(generator_id)
+        password: str = generator_entity.generate_password(text)
+        password_entity.text = text
+        password_entity.password = password
+        password_entity.encrypt()
+        self.password_repository.update(password_entity)
+        return password_entity
 
 
 class DeletePasswordUseCase:
-    def __init__(self, password_repository: PasswordRepository, user_repository: UserRepository):
+    def __init__(self, password_repository: PasswordRepository):
         self.password_repository: PasswordRepository = password_repository
-        self.user_repository: UserRepository = user_repository
 
-    def execute(self, user_id: UUID, password_id: UUID) -> None:
-        self.password_repository.delete(password_id)
-        user_entity: User = self.user_repository.find_by_id(user_id)
-        user_entity.delete_password(password_id)
-        self.user_repository.update(user_entity)
+    def execute(self, context: str) -> None:
+        password_entity: Password = self.password_repository.get_by_context(context)
+        if not password_entity:
+            raise PasswordNotFoundException()
+        self.password_repository.delete(password_entity)
 
 
-class GetAllUserPasswordsUseCase:
-    def __init__(self, password_repository: PasswordRepository, user_repository: UserRepository):
+class GetAllPasswordsUseCase:
+    def __init__(self, password_repository: PasswordRepository):
         self.password_repository: PasswordRepository = password_repository
-        self.user_repository: UserRepository = user_repository
 
-    def execute(self, user_id: UUID) -> list[Password]:
-        user_entity: User = self.user_repository.find_by_id(user_id)
-        passwords: list[Password] = []
-        for password_id in user_entity.passwords:
-            password_entity: Password = self.password_repository.find_by_id(password_id)
-            passwords.append(password_entity)
-        return passwords
+    def execute(self) -> list[Password]:
+        return self.password_repository.list()
 
 
-class DeleteAllUserPasswordsUseCase:
-    def __init__(self, password_repository: PasswordRepository, user_repository: UserRepository):
+class DeleteAllPasswordsUseCase:
+    def __init__(self, password_repository: PasswordRepository):
         self.password_repository: PasswordRepository = password_repository
-        self.user_repository: UserRepository = user_repository
 
-    def execute(self, user_id: UUID) -> None:
-        user_entity: User = self.user_repository.find_by_id(user_id)
-        for password_id in user_entity.passwords:
-            self.password_repository.delete(password_id)
-            user_entity.delete_password(password_id)
-        self.user_repository.update(user_entity)
+    def execute(self) -> None:
+        self.password_repository.flush()

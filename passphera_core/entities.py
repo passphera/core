@@ -5,22 +5,19 @@ from uuid import UUID, uuid4
 from cryptography.fernet import Fernet
 
 from cipherspy.cipher import *
-from cipherspy.cipher.base_cipher import BaseCipherAlgorithm
+from cipherspy.exceptions import InvalidAlgorithmException
 from cipherspy.utilities import generate_salt, derive_key
-
-from passphera_core import exceptions
 
 
 @dataclass
 class Password:
     id: UUID = field(default_factory=uuid4)
-    user_id: UUID = field(default_factory=uuid4)
-    created_at: datetime = field(default=datetime.now(timezone.utc))
-    updated_at: datetime = field(default=datetime.now(timezone.utc))
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     context: str = field(default_factory=str)
     text: str = field(default_factory=str)
     password: str = field(default_factory=str)
-    salt: bytes = field(default_factory=bytes)
+    salt: bytes = field(default_factory=lambda: bytes)
 
     def encrypt(self) -> None:
         self.salt = generate_salt()
@@ -33,9 +30,10 @@ class Password:
 
 
 @dataclass
-class GeneratorConfig:
+class Generator:
     id: UUID = field(default_factory=uuid4)
-    generator_id: UUID = field(default_factory=uuid4)
+    created_at: datetime = field(default_factory=datetime.now)
+    updated_at: datetime = field(default_factory=datetime.now)
     shift: int = field(default=3)
     multiplier: int = field(default=3)
     key: str = field(default="hill")
@@ -56,7 +54,7 @@ class GeneratorConfig:
         :return: BaseCipherAlgorithm: The primary algorithm used for the cipher
         """
         if self.algorithm.lower() not in self._cipher_registry:
-            raise exceptions.InvalidAlgorithmException(self.algorithm)
+            raise InvalidAlgorithmException(self.algorithm)
         return self._cipher_registry[self.algorithm.lower()]
 
     def replace_character(self, char: str, replacement: str) -> None:
@@ -77,53 +75,24 @@ class GeneratorConfig:
         """
         self.characters_replacements.pop(char, None)
 
-
-@dataclass
-class Generator:
-    id: UUID = field(default_factory=uuid4)
-    user_id: UUID = field(default_factory=uuid4)
-    created_at: datetime = field(default_factory=datetime.now)
-    updated_at: datetime = field(default_factory=datetime.now)
-    config_id: UUID = field(default_factory=UUID)
-    config: GeneratorConfig = field(default_factory=GeneratorConfig)
-    
-    def __post_init__(self):
-        self.config = GeneratorConfig(generator_id=self.id)
-
     def apply_replacements(self, password: str) -> str:
         """
         Replace character from the ciphered password with character replacements from the generator configurations
+        :param password: The password to perform the action on it
         :return: str: The new ciphered password after character replacements
         """
-        translation_table = str.maketrans(self.config.characters_replacements)
+        translation_table: dict[int, str] = str.maketrans(self.characters_replacements)
         return password.translate(translation_table)
 
     def generate_password(self, text: str) -> str:
         """
         Generate a strong password string using the raw password (add another layer of encryption to it)
+        :param text: The text to generate password from it
         :return: str: The generated ciphered password
         """
-        affine = AffineCipherAlgorithm(self.config.shift, self.config.multiplier)
-        intermediate = affine.encrypt(f"{self.config.prefix}{text}{self.config.postfix}")
-        main_algorithm = self.config.get_algorithm()
-        password = main_algorithm.encrypt(intermediate)
+        main_algorithm: BaseCipherAlgorithm = self.get_algorithm()
+        secondary_algorithm: AffineCipherAlgorithm = AffineCipherAlgorithm(self.shift, self.multiplier)
+        intermediate: str = secondary_algorithm.encrypt(f"{self.prefix}{text}{self.postfix}")
+        password: str = main_algorithm.encrypt(intermediate)
         password = self.apply_replacements(password)
         return ''.join(c.upper() if c in text else c for c in password)
-
-
-@dataclass
-class User:
-    id: UUID = field(default_factory=uuid4)
-    created_at: datetime = field(default_factory=datetime.now)
-    updated_at: datetime = field(default_factory=datetime.now)
-    username: str = field(default_factory=str)
-    email: str = field(default_factory=str)
-    password: str = field(default_factory=str)
-    generator_id: UUID = field(default_factory=UUID)
-    passwords_ids: list[UUID] = field(default_factory=list[UUID])
-
-    def add_password(self, password_id: UUID) -> None:
-        self.passwords_ids.append(password_id)
-
-    def delete_password(self, password_id: UUID) -> None:
-        self.passwords_ids.remove(password_id)

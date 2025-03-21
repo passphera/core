@@ -36,7 +36,7 @@ class GeneratorRepository(ABC):
         pass
 
     @abstractmethod
-    def get(self, generator_id: UUID) -> Generator:
+    def get(self) -> Generator:
         pass
 
     @abstractmethod

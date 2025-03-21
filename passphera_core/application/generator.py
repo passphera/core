@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from uuid import UUID
 
 from passphera_core.entities import Generator
 from passphera_core.interfaces import GeneratorRepository

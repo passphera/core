@@ -16,7 +16,7 @@ class GeneratePasswordUseCase:
 
     def execute(self, generator_id: UUID, context: str, text: str) -> Password:
         password_entity: Password = self.password_repository.get_by_context(context)
-        if password_entity:
+        if password_entity and password_entity.deleted_at is not None:
             raise DuplicatePasswordException(password_entity)
         generator_entity: Generator = self.generator_repository.get(generator_id)
         password: str = generator_entity.generate_password(text)

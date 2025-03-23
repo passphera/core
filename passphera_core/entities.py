@@ -14,7 +14,6 @@ class Password:
     id: UUID = field(default_factory=uuid4)
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    deleted_at: datetime = field(default=None)
     context: str = field(default_factory=str)
     text: str = field(default_factory=str)
     password: str = field(default_factory=str)

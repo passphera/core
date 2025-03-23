@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
 
 from passphera_core.entities import Password, Generator
-from passphera_core.exceptions import DuplicatePasswordException, PasswordNotFoundException
+from passphera_core.exceptions import DuplicatePasswordException
 from passphera_core.interfaces import PasswordRepository, GeneratorRepository
+from passphera_core.utilities import get_password
 
 
 class GeneratePasswordUseCase:
@@ -16,7 +17,7 @@ class GeneratePasswordUseCase:
 
     def execute(self, context: str, text: str) -> Password:
         password_entity: Password = self.password_repository.get_by_context(context)
-        if password_entity and password_entity.deleted_at is not None:
+        if password_entity:
             raise DuplicatePasswordException(password_entity)
         generator_entity: Generator = self.generator_repository.get()
         password: str = generator_entity.generate_password(text)
@@ -31,10 +32,7 @@ class GetPasswordByContextUseCase:
         self.password_repository: PasswordRepository = password_repository
 
     def execute(self, context: str) -> Password:
-        password_entity: Password = self.password_repository.get_by_context(context)
-        if not password_entity or password_entity.deleted_at is not None:
-            raise PasswordNotFoundException()
-        return password_entity
+        return get_password(self.password_repository, context)
 
 
 class UpdatePasswordUseCase:
@@ -47,9 +45,7 @@ class UpdatePasswordUseCase:
         self.generator_repository: GeneratorRepository = generator_repository
 
     def execute(self, context: str, text: str) -> Password:
-        password_entity: Password = self.password_repository.get_by_context(context)
-        if not password_entity or password_entity.deleted_at is not None:
-            raise PasswordNotFoundException()
+        password_entity: Password = get_password(self.password_repository, context)
         generator_entity: Generator = self.generator_repository.get()
         password: str = generator_entity.generate_password(text)
         password_entity.text = text
@@ -65,11 +61,7 @@ class DeletePasswordUseCase:
         self.password_repository: PasswordRepository = password_repository
 
     def execute(self, context: str) -> None:
-        password_entity: Password = self.password_repository.get_by_context(context)
-        if not password_entity or password_entity.deleted_at is not None:
-            raise PasswordNotFoundException()
-        password_entity.deleted_at = datetime.now(timezone.utc)
-        self.password_repository.delete(password_entity)
+        self.password_repository.delete(get_password(self.password_repository, context))
 
 
 class GetAllPasswordsUseCase:

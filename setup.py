@@ -1,11 +1,11 @@
 from setuptools import setup, find_packages
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+with open("README.md", "r") as f:
+    long_description = f.read()
 
 setup(
     name='passphera-core',
-    version='0.14.0',
+    version='0.15.0',
     author='Fathi Abdelmalek',
     author_email='abdelmalek.fathi.2001@gmail.com',
     url='https://github.com/passphera/core',

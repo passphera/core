@@ -25,32 +25,35 @@ class UpdateGeneratorPropertyUseCase:
     def __init__(self, generator_repository: GeneratorRepository):
         self.generator_repository: GeneratorRepository = generator_repository
 
-    def execute(self, field: str, value: str) -> None:
+    def execute(self, field: str, value: str) -> Generator:
         generator_entity: Generator = self.generator_repository.get()
         setattr(generator_entity, field, value)
         if field == 'algorithm':
             generator_entity.get_algorithm()
         generator_entity.updated_at = datetime.now(timezone.utc)
         self.generator_repository.update(generator_entity)
+        return generator_entity
 
 
 class AddCharacterReplacementUseCase:
     def __init__(self, generator_repository: GeneratorRepository):
         self.generator_repository: GeneratorRepository = generator_repository
 
-    def execute(self, character: str, replacement: str) -> None:
+    def execute(self, character: str, replacement: str) -> Generator:
         generator_entity: Generator = self.generator_repository.get()
         generator_entity.replace_character(character, replacement)
         generator_entity.updated_at = datetime.now(timezone.utc)
         self.generator_repository.update(generator_entity)
+        return generator_entity
 
 
 class ResetCharacterReplacementUseCase:
     def __init__(self, generator_repository: GeneratorRepository,):
         self.generator_repository: GeneratorRepository = generator_repository
 
-    def execute(self, character: str) -> None:
+    def execute(self, character: str) -> Generator:
         generator_entity: Generator = self.generator_repository.get()
         generator_entity.reset_character(character)
         generator_entity.updated_at = datetime.now(timezone.utc)
         self.generator_repository.update(generator_entity)
+        return generator_entity

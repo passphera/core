@@ -44,7 +44,7 @@ class UpdatePasswordUseCase:
         self.password_repository: PasswordRepository = password_repository
         self.generator_repository: GeneratorRepository = generator_repository
 
-    def execute(self, context: str, text: str) -> Password:
+    def execute(self, context: str, text: str) -> None:
         password_entity: Password = get_password(self.password_repository, context)
         generator_entity: Generator = self.generator_repository.get()
         password: str = generator_entity.generate_password(text)
@@ -53,7 +53,6 @@ class UpdatePasswordUseCase:
         password_entity.updated_at = datetime.now(timezone.utc)
         password_entity.encrypt()
         self.password_repository.update(password_entity)
-        return password_entity
 
 
 class DeletePasswordUseCase:

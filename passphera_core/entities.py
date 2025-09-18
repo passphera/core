@@ -75,14 +75,6 @@ class Generator:
         """
         self.characters_replacements.pop(char, None)
 
-    def apply_replacements(self, password: str) -> str:
-        """
-        Replace character from the ciphered password with character replacements from the generator configurations
-        :param password: The password to perform the action on it
-        :return: str: The new ciphered password after character replacements
-        """
-        return password.translate(str.maketrans(self.characters_replacements))
-
     def generate_password(self, text: str) -> str:
         """
         Generate a strong password string using the raw password (add another layer of encryption to it)
@@ -93,5 +85,5 @@ class Generator:
         secondary_algorithm: AffineCipherAlgorithm = AffineCipherAlgorithm(self.shift, self.multiplier)
         intermediate: str = secondary_algorithm.encrypt(f"{self.prefix}{text}{self.postfix}")
         password: str = main_algorithm.encrypt(intermediate)
-        password = self.apply_replacements(password)
+        password = password.translate(str.maketrans(self.characters_replacements))
         return ''.join(c.upper() if c in text else c for c in password)

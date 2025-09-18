@@ -27,7 +27,7 @@ class GeneratePasswordUseCase:
         return password_entity
 
 
-class GetPasswordByContextUseCase:
+class GetPasswordUseCase:
     def __init__(self, password_repository: PasswordRepository):
         self.password_repository: PasswordRepository = password_repository
 
@@ -63,7 +63,7 @@ class DeletePasswordUseCase:
         self.password_repository.delete(get_password(self.password_repository, context))
 
 
-class GetAllPasswordsUseCase:
+class ListPasswordsUseCase:
     def __init__(self, password_repository: PasswordRepository):
         self.password_repository: PasswordRepository = password_repository
 
@@ -71,7 +71,7 @@ class GetAllPasswordsUseCase:
         return self.password_repository.list()
 
 
-class DeleteAllPasswordsUseCase:
+class FlushPasswordsUseCase:
     def __init__(self, password_repository: PasswordRepository):
         self.password_repository: PasswordRepository = password_repository
 

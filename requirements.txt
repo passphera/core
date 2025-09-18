@@ -1,2 +1,6 @@
-cipherspy
-cryptography
+cffi==1.17.1
+cipherspy==0.7.0
+cryptography==45.0.6
+numpy==2.3.2
+pycparser==2.22
+setuptools==80.9.0

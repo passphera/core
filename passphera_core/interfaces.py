@@ -3,13 +3,13 @@ from abc import ABC, abstractmethod
 from passphera_core.entities import Password, Generator
 
 
-class PasswordRepository(ABC):
+class VaultRepository(ABC):
     @abstractmethod
     def save(self, password: Password) -> None:
         pass
 
     @abstractmethod
-    def get_by_context(self, context: str) -> Password:
+    def get(self, context: str) -> Password:
         pass
 
     @abstractmethod

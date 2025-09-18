@@ -57,23 +57,40 @@ class Generator:
             raise InvalidAlgorithmException(self.algorithm)
         return self._cipher_registry[self.algorithm.lower()]
 
+    def update_property(self, field: str, value: str):
+        """
+        Update a generator property with a new value
+        :param field: The property name to update, must be one of: shift, multiplier, algorithm, key, prefix, postfix
+        :param value: The new value to set for the property
+        :raises ValueError: If the field name is not one of the allowed properties
+        :return: None
+        """
+        if field not in {"shift", "multiplier", "algorithm", "key", "prefix", "postfix"}:
+            raise ValueError(f"Invalid property: {field}")
+        setattr(self, field, value)
+        if field == "algorithm":
+            self.get_algorithm()
+        self.updated_at = datetime.now(timezone.utc)
+
     def replace_character(self, char: str, replacement: str) -> None:
         """
         Replace a character with another character or set of characters
         Eg: pg.replace_character('a', '@1')
         :param char: The character to be replaced
         :param replacement: The (character|set of characters) to replace the first one
-        :return:
+        :return: None
         """
         self.characters_replacements[char[0]] = replacement
+        self.updated_at = datetime.now(timezone.utc)
 
     def reset_character(self, char: str) -> None:
         """
         Reset a character to its original value (remove its replacement from characters_replacements)
         :param char: The character to be reset to its original value
-        :return:
+        :return: None
         """
         self.characters_replacements.pop(char, None)
+        self.updated_at = datetime.now(timezone.utc)
 
     def generate_password(self, text: str) -> str:
         """

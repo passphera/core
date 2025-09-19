@@ -8,15 +8,14 @@ class GetGeneratorUseCase:
 
     def __call__(self) -> Generator:
         return self.generator_repository.get()
-    
-    
-class GetGeneratorPropertyUseCase:
+
+
+class GetGeneratorSettingsUseCase:
     def __init__(self, generator_repository: GeneratorRepository):
         self.generator_repository: GeneratorRepository = generator_repository
 
-    def __call__(self, field: str) -> str:
-        generator_entity: Generator = self.generator_repository.get()
-        return getattr(generator_entity, field)
+    def __call__(self) -> dict[str, str | int]:
+        return self.generator_repository.get().get_settings()
 
 
 class UpdateGeneratorPropertyUseCase:

@@ -57,15 +57,37 @@ class Generator:
             raise InvalidAlgorithmException(self.algorithm)
         return self._cipher_registry[self.algorithm.lower()]
 
+    def get_settings(self) -> dict:
+        """
+        Retrieves the application settings.
+
+        This method is responsible for providing a dictionary containing
+        the current configuration settings of the application. It ensures
+        that the settings are properly assembled and returned for use
+        elsewhere in the application.
+
+        Returns:
+            dict: A dictionary containing the application settings.
+        """
+        return {
+            "shift": self.shift,
+            "multiplier": self.multiplier,
+            "key": self.key,
+            "algorithm": self.algorithm,
+            "prefix": self.prefix,
+            "postfix": self.postfix,
+            "characters_replacements": self.characters_replacements,
+        }
+
     def update_property(self, field: str, value: str):
         """
         Update a generator property with a new value
-        :param field: The property name to update, must be one of: shift, multiplier, algorithm, key, prefix, postfix
+        :param field: The property name to update, it must be one of: shift, multiplier, key, algorithm, prefix, postfix
         :param value: The new value to set for the property
         :raises ValueError: If the field name is not one of the allowed properties
         :return: None
         """
-        if field not in {"shift", "multiplier", "algorithm", "key", "prefix", "postfix"}:
+        if field not in {"shift", "multiplier", "key", "algorithm", "prefix", "postfix"}:
             raise ValueError(f"Invalid property: {field}")
         setattr(self, field, value)
         if field == "algorithm":

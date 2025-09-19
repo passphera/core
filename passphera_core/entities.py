@@ -61,6 +61,23 @@ class Password:
         key = derive_key(self.password, self.salt)
         return Fernet(key).decrypt(self.password.encode()).decode()
 
+    def to_dict(self) -> dict:
+        """Convert the Password entity to a dictionary."""
+        return {
+            "id": self.id,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+            "context": self.context,
+            "text": self.text,
+            "password": self.password,
+            "salt": self.salt,
+        }
+
+    def from_dict(self, data: dict) -> None:
+        """Convert a dictionary to a Password entity."""
+        for key, value in data.items():
+            setattr(self, key, value)
+
 
 @dataclass
 class Generator:
@@ -177,3 +194,22 @@ class Generator:
         password: str = main_algorithm.encrypt(intermediate)
         password = password.translate(str.maketrans(self.characters_replacements))
         return ''.join(c.upper() if c in text else c for c in password)
+
+    def to_dict(self) -> dict:
+        """Convert the Generator entity to a dictionary."""
+        return {
+            "id": self.id,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+            "shift": self.shift,
+            "multiplier": self.multiplier,
+            "key": self.key,
+            "algorithm": self.algorithm,
+            "prefix": self.prefix,
+            "postfix": self.postfix,
+        }
+
+    def from_dict(self, data: dict) -> None:
+        """Convert a dictionary to a Generator entity."""
+        for key, value in data.items():
+            setattr(self, key, value)

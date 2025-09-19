@@ -10,23 +10,26 @@ class GetGeneratorUseCase:
         return self.generator_repository.get()
 
 
-class GetGeneratorSettingsUseCase:
+class SetGeneratorPropertyUseCase:
     def __init__(self, generator_repository: GeneratorRepository):
         self.generator_repository: GeneratorRepository = generator_repository
 
-    def __call__(self) -> dict[str, str | int]:
-        return self.generator_repository.get().get_settings()
-
-
-class UpdateGeneratorPropertyUseCase:
-    def __init__(self, generator_repository: GeneratorRepository):
-        self.generator_repository: GeneratorRepository = generator_repository
-
-    def __call__(self, field: str, value: str) -> str:
+    def __call__(self, field: str, value: str) -> Generator:
         generator_entity: Generator = self.generator_repository.get()
-        generator_entity.update_property(field, value)
+        generator_entity.set_property(field, value)
         self.generator_repository.update(generator_entity)
-        return getattr(generator_entity, field)
+        return generator_entity
+
+
+class ResetGeneratorPropertyUseCase:
+    def __init__(self, generator_repository: GeneratorRepository):
+        self.generator_repository: GeneratorRepository = generator_repository
+
+    def __call__(self, field: str) -> Generator:
+        generator_entity: Generator = self.generator_repository.get()
+        generator_entity.reset_property(field)
+        self.generator_repository.update(generator_entity)
+        return generator_entity
 
 
 class AddCharacterReplacementUseCase:

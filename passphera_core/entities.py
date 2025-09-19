@@ -79,20 +79,44 @@ class Generator:
             "characters_replacements": self.characters_replacements,
         }
 
-    def update_property(self, field: str, value: str):
+    def set_property(self, property: str, value: str):
         """
         Update a generator property with a new value
-        :param field: The property name to update, it must be one of: shift, multiplier, key, algorithm, prefix, postfix
+        :param property: The property name to update; must be one of: shift, multiplier, key, algorithm, prefix, postfix
         :param value: The new value to set for the property
-        :raises ValueError: If the field name is not one of the allowed properties
+        :raises ValueError: If the property name is not one of the allowed properties
         :return: None
         """
-        if field not in {"shift", "multiplier", "key", "algorithm", "prefix", "postfix"}:
-            raise ValueError(f"Invalid property: {field}")
-        if field in ["shift", "multiplier"]:
+        if property not in {"shift", "multiplier", "key", "algorithm", "prefix", "postfix"}:
+            raise ValueError(f"Invalid property: {property}")
+        if property in ["shift", "multiplier"]:
             value = int(value)
-        setattr(self, field, value)
-        if field == "algorithm":
+        setattr(self, property, value)
+        if property == "algorithm":
+            self.get_algorithm()
+        self.updated_at = datetime.now(timezone.utc)
+        
+    def reset_property(self, property: str):
+        """
+        Reset a generator property to its default value
+        :param property: The property name to reset, it must be one of: shift, multiplier, key, algorithm, prefix, postfix
+        :raises ValueError: If the property name is not one of the allowed properties
+        :return: None
+        """
+        if property not in {"shift", "multiplier", "key", "algorithm", "prefix", "postfix"}:
+            raise ValueError(f"Invalid property: {property}")
+
+        defaults = {
+            "shift": 3,
+            "multiplier": 3,
+            "key": "hill",
+            "algorithm": "hill",
+            "prefix": "secret",
+            "postfix": "secret"
+        }
+
+        setattr(self, property, defaults[property])
+        if property == "algorithm":
             self.get_algorithm()
         self.updated_at = datetime.now(timezone.utc)
 

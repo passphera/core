@@ -10,29 +10,45 @@ class GetGeneratorUseCase:
         return self.generator_repository.get()
 
 
-class SetGeneratorPropertyUseCase:
+class GetPropertiesUseCase:
     def __init__(self, generator_repository: GeneratorRepository):
         self.generator_repository: GeneratorRepository = generator_repository
 
-    def __call__(self, field: str, value: str) -> Generator:
+    def __call__(self) -> dict:
+        return self.generator_repository.get().get_properties()
+
+
+class SetPropertyUseCase:
+    def __init__(self, generator_repository: GeneratorRepository):
+        self.generator_repository: GeneratorRepository = generator_repository
+
+    def __call__(self, prop: str, value: str) -> Generator:
         generator_entity: Generator = self.generator_repository.get()
-        generator_entity.set_property(field, value)
+        generator_entity.set_property(prop, value)
         self.generator_repository.update(generator_entity)
         return generator_entity
 
 
-class ResetGeneratorPropertyUseCase:
+class ResetPropertyUseCase:
     def __init__(self, generator_repository: GeneratorRepository):
         self.generator_repository: GeneratorRepository = generator_repository
 
-    def __call__(self, field: str) -> Generator:
+    def __call__(self, prop: str) -> Generator:
         generator_entity: Generator = self.generator_repository.get()
-        generator_entity.reset_property(field)
+        generator_entity.reset_property(prop)
         self.generator_repository.update(generator_entity)
         return generator_entity
 
 
-class AddCharacterReplacementUseCase:
+class GetCharacterReplacementUseCase:
+    def __init__(self, generator_repository: GeneratorRepository):
+        self.generator_repository: GeneratorRepository = generator_repository
+
+    def __call__(self, character: str) -> str:
+        return self.generator_repository.get().get_character_replacement(character)
+
+
+class SetCharacterReplacementUseCase:
     def __init__(self, generator_repository: GeneratorRepository):
         self.generator_repository: GeneratorRepository = generator_repository
 

@@ -89,6 +89,8 @@ class Generator:
         """
         if field not in {"shift", "multiplier", "key", "algorithm", "prefix", "postfix"}:
             raise ValueError(f"Invalid property: {field}")
+        if field in ["shift", "multiplier"]:
+            value = int(value)
         setattr(self, field, value)
         if field == "algorithm":
             self.get_algorithm()

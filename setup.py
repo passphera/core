@@ -5,11 +5,11 @@ with open("README.md", "r") as f:
 
 setup(
     name='passphera-core',
-    version='0.30.1',
+    version='0.32.1',
     author='Fathi Abdelmalek',
-    author_email='abdelmalek.fathi.2001@gmail.com',
+    author_email='passphera@imfathi.com',
     url='https://github.com/passphera/core',
-    description='The core system of passphera project',
+    description='The core of passphera project',
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(),

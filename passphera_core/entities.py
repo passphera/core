@@ -1,23 +1,17 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from uuid import UUID, uuid4
-
-from cryptography.fernet import Fernet
 
 from cipherspy.cipher import *
 from cipherspy.exceptions import InvalidAlgorithmException
-from cipherspy.utilities import generate_salt, derive_key
 
-from passphera_core.exceptions import InvalidPropertyNameException
+from passphera_core.utilities import check_property_name
 
-
-_cipher_registry: dict[str, BaseCipherAlgorithm] = {
+_cipher_registry: dict = {
     'caesar': CaesarCipherAlgorithm,
     'affine': AffineCipherAlgorithm,
     'playfair': PlayfairCipherAlgorithm,
     'hill': HillCipherAlgorithm,
 }
-_default_properties: dict[str, str] = {
+_default_properties: dict[str, object] = {
     "shift": 3,
     "multiplier": 3,
     "key": "hill",
@@ -28,62 +22,7 @@ _default_properties: dict[str, str] = {
 
 
 @dataclass
-class Password:
-    id: UUID = field(default_factory=uuid4)
-    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    context: str = field(default_factory=str)
-    text: str = field(default_factory=str)
-    password: str = field(default_factory=str)
-    salt: bytes = field(default_factory=lambda: bytes)
-
-    def encrypt(self) -> None:
-        """
-        Encrypts the password using Fernet symmetric encryption.
-
-        This method generates a new salt, derives an encryption key using the password
-        and salt, and then encrypts the password using Fernet encryption. The encrypted
-        password is stored back in the password field as a base64-encoded string.
-        :return: None
-        """
-        self.salt = generate_salt()
-        key = derive_key(self.password, self.salt)
-        self.password = Fernet(key).encrypt(self.password.encode()).decode()
-
-    def decrypt(self) -> str:
-        """
-        Decrypts the encrypted password using Fernet symmetric decryption.
-
-        This method uses the stored salt to derive the encryption key and then
-        decrypts the stored encrypted password using Fernet decryption.
-        :return: str: The decrypted original password
-        """
-        key = derive_key(self.password, self.salt)
-        return Fernet(key).decrypt(self.password.encode()).decode()
-
-    def to_dict(self) -> dict:
-        """Convert the Password entity to a dictionary."""
-        return {
-            "id": self.id,
-            "created_at": self.created_at,
-            "updated_at": self.updated_at,
-            "context": self.context,
-            "text": self.text,
-            "password": self.password,
-            "salt": self.salt,
-        }
-
-    def from_dict(self, data: dict) -> None:
-        """Convert a dictionary to a Password entity."""
-        for key, value in data.items():
-            setattr(self, key, value)
-
-
-@dataclass
 class Generator:
-    id: UUID = field(default_factory=uuid4)
-    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     shift: int = field(default=_default_properties["shift"])
     multiplier: int = field(default=_default_properties["multiplier"])
     key: str = field(default=_default_properties["key"])
@@ -97,9 +36,19 @@ class Generator:
         Get the primary algorithm used to cipher the password
         :return: BaseCipherAlgorithm: The primary algorithm used for the cipher
         """
-        if self.algorithm.lower() not in _cipher_registry:
+        algo_name = self.algorithm.lower()
+        if algo_name not in _cipher_registry:
             raise InvalidAlgorithmException(self.algorithm)
-        return _cipher_registry[self.algorithm.lower()]
+        AlgoClass = _cipher_registry[algo_name]
+        if algo_name == "caesar":
+            return AlgoClass(self.shift)
+        elif algo_name == "affine":
+            return AlgoClass(self.shift, self.multiplier)
+        elif algo_name == "playfair":
+            return AlgoClass(self.key)
+        elif algo_name == "hill":
+            return AlgoClass(self.key)
+        raise InvalidAlgorithmException(self.algorithm)
 
     def get_properties(self) -> dict:
         """
@@ -123,6 +72,17 @@ class Generator:
             "characters_replacements": self.characters_replacements,
         }
 
+    @check_property_name
+    def get_property(self, prop: str):
+        """
+        Get the value of a specific generator property
+        :param prop: The property name to retrieve; must be one of: shift, multiplier, key, algorithm, prefix, postfix
+        :raises InvalidPropertyNameException: If the property name is not one of the allowed properties
+        :return: The value of the requested property
+        """
+        return getattr(self, prop)
+
+    @check_property_name
     def set_property(self, prop: str, value: str):
         """
         Update a generator property with a new value
@@ -131,29 +91,24 @@ class Generator:
         :raises ValueError: If the property name is not one of the allowed properties
         :return: None
         """
-        if prop not in {"id", "created_at", "updated_at", "shift", "multiplier", "key", "algorithm", "prefix", "postfix"}:
-            raise InvalidPropertyNameException(prop)
         if prop in ["shift", "multiplier"]:
             value = int(value)
         setattr(self, prop, value)
         if prop == "algorithm":
             self.get_algorithm()
-        self.updated_at = datetime.now(timezone.utc)
-        
-    def reset_property(self, prop: str):
+
+    @check_property_name
+    def reset_property(self, prop: str) -> None:
         """
         Reset a generator property to its default value
         :param prop: The property name to reset, it must be one of: shift, multiplier, key, algorithm, prefix, postfix
         :raises ValueError: If the property name is not one of the allowed properties
         :return: None
         """
-        if prop not in {"id", "created_at", "updated_at", "shift", "multiplier", "key", "algorithm", "prefix", "postfix"}:
-            raise InvalidPropertyNameException(prop)
         setattr(self, prop, _default_properties[prop])
         if prop == "algorithm":
             self.get_algorithm()
-        self.updated_at = datetime.now(timezone.utc)
-        
+
     def get_character_replacement(self, character: str) -> str:
         """
         Get the replacement string for a given character
@@ -162,7 +117,7 @@ class Generator:
         """
         return self.characters_replacements.get(character, character)
 
-    def replace_character(self, character: str, replacement: str) -> None:
+    def set_character_replacement(self, character: str, replacement: str) -> None:
         """
         Replace a character with another character or set of characters
         Eg: pg.replace_character('a', '@1')
@@ -171,16 +126,14 @@ class Generator:
         :return: None
         """
         self.characters_replacements[character[0]] = replacement
-        self.updated_at = datetime.now(timezone.utc)
 
-    def reset_character(self, character: str) -> None:
+    def reset_character_replacement(self, character: str) -> None:
         """
         Reset a character to its original value (remove its replacement from characters_replacements)
         :param character: The character to be reset to its original value
         :return: None
         """
         self.characters_replacements.pop(character, None)
-        self.updated_at = datetime.now(timezone.utc)
 
     def generate_password(self, text: str) -> str:
         """
@@ -192,24 +145,24 @@ class Generator:
         secondary_algorithm: AffineCipherAlgorithm = AffineCipherAlgorithm(self.shift, self.multiplier)
         intermediate: str = secondary_algorithm.encrypt(f"{self.prefix}{text}{self.postfix}")
         password: str = main_algorithm.encrypt(intermediate)
-        password = password.translate(str.maketrans(self.characters_replacements))
+        for char, repl in self.characters_replacements.items():
+            password = password.replace(char, repl)
         return ''.join(c.upper() if c in text else c for c in password)
 
     def to_dict(self) -> dict:
         """Convert the Generator entity to a dictionary."""
         return {
-            "id": self.id,
-            "created_at": self.created_at,
-            "updated_at": self.updated_at,
             "shift": self.shift,
             "multiplier": self.multiplier,
             "key": self.key,
             "algorithm": self.algorithm,
             "prefix": self.prefix,
             "postfix": self.postfix,
+            "character_replacements": self.characters_replacements,
         }
 
     def from_dict(self, data: dict) -> None:
         """Convert a dictionary to a Generator entity."""
         for key, value in data.items():
-            setattr(self, key, value)
+            if key in _default_properties or key == "characters_replacements":
+                setattr(self, key, value)

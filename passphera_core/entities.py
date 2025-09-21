@@ -30,8 +30,8 @@ _default_properties: dict[str, str] = {
 @dataclass
 class Password:
     id: UUID = field(default_factory=uuid4)
-    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     context: str = field(default_factory=str)
     text: str = field(default_factory=str)
     password: str = field(default_factory=str)
@@ -82,8 +82,8 @@ class Password:
 @dataclass
 class Generator:
     id: UUID = field(default_factory=uuid4)
-    created_at: datetime = field(default_factory=datetime.now)
-    updated_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     shift: int = field(default=_default_properties["shift"])
     multiplier: int = field(default=_default_properties["multiplier"])
     key: str = field(default=_default_properties["key"])
@@ -131,7 +131,7 @@ class Generator:
         :raises ValueError: If the property name is not one of the allowed properties
         :return: None
         """
-        if prop not in {"shift", "multiplier", "key", "algorithm", "prefix", "postfix"}:
+        if prop not in {"id", "created_at", "updated_at", "shift", "multiplier", "key", "algorithm", "prefix", "postfix"}:
             raise InvalidPropertyNameException(prop)
         if prop in ["shift", "multiplier"]:
             value = int(value)
@@ -147,7 +147,7 @@ class Generator:
         :raises ValueError: If the property name is not one of the allowed properties
         :return: None
         """
-        if prop not in {"shift", "multiplier", "key", "algorithm", "prefix", "postfix"}:
+        if prop not in {"id", "created_at", "updated_at", "shift", "multiplier", "key", "algorithm", "prefix", "postfix"}:
             raise InvalidPropertyNameException(prop)
         setattr(self, prop, _default_properties[prop])
         if prop == "algorithm":

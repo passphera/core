@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name='passphera-core',
-    version='0.32.1',
+    version='0.32.2',
     author='Fathi Abdelmalek',
     author_email='passphera@imfathi.com',
     url='https://github.com/passphera/core',
@@ -17,7 +17,7 @@ setup(
     install_requires=['cipherspy'],
     classifiers=[
         "Development Status :: 4 - Beta",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",

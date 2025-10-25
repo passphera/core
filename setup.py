@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name='passphera-core',
-    version='0.32.2',
+    version='0.33.0',
     author='Fathi Abdelmalek',
     author_email='passphera@imfathi.com',
     url='https://github.com/passphera/core',

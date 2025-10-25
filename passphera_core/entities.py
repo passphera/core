@@ -1,34 +1,21 @@
 from dataclasses import dataclass, field
 
-from cipherspy.cipher import *
+from cipherspy.cipher import (
+    BaseCipherAlgorithm,
+    AffineCipherAlgorithm)
 from cipherspy.exceptions import InvalidAlgorithmException
 
-from passphera_core.utilities import check_property_name
-
-_cipher_registry: dict = {
-    'caesar': CaesarCipherAlgorithm,
-    'affine': AffineCipherAlgorithm,
-    'playfair': PlayfairCipherAlgorithm,
-    'hill': HillCipherAlgorithm,
-}
-_default_properties: dict[str, object] = {
-    "shift": 3,
-    "multiplier": 3,
-    "key": "hill",
-    "algorithm": "hill",
-    "prefix": "secret",
-    "postfix": "secret"
-}
+from passphera_core.utilities import check_property_name, default_properties, cipher_registry
 
 
 @dataclass
 class Generator:
-    shift: int = field(default=_default_properties["shift"])
-    multiplier: int = field(default=_default_properties["multiplier"])
-    key: str = field(default=_default_properties["key"])
-    algorithm: str = field(default=_default_properties["algorithm"])
-    prefix: str = field(default=_default_properties["prefix"])
-    postfix: str = field(default=_default_properties["postfix"])
+    shift: int = field(default=default_properties["shift"])
+    multiplier: int = field(default=default_properties["multiplier"])
+    key: str = field(default=default_properties["key"])
+    algorithm: str = field(default=default_properties["algorithm"])
+    prefix: str = field(default=default_properties["prefix"])
+    postfix: str = field(default=default_properties["postfix"])
     characters_replacements: dict[str, str] = field(default_factory=dict[str, str])
 
     def get_algorithm(self) -> BaseCipherAlgorithm:
@@ -37,9 +24,9 @@ class Generator:
         :return: BaseCipherAlgorithm: The primary algorithm used for the cipher
         """
         algo_name = self.algorithm.lower()
-        if algo_name not in _cipher_registry:
+        if algo_name not in cipher_registry:
             raise InvalidAlgorithmException(self.algorithm)
-        AlgoClass = _cipher_registry[algo_name]
+        AlgoClass = cipher_registry[algo_name]
         if algo_name == "caesar":
             return AlgoClass(self.shift)
         elif algo_name == "affine":
@@ -105,7 +92,7 @@ class Generator:
         :raises ValueError: If the property name is not one of the allowed properties
         :return: None
         """
-        setattr(self, prop, _default_properties[prop])
+        setattr(self, prop, default_properties[prop])
         if prop == "algorithm":
             self.get_algorithm()
 
@@ -148,21 +135,3 @@ class Generator:
         for char, repl in self.characters_replacements.items():
             password = password.replace(char, repl)
         return ''.join(c.upper() if c in text else c for c in password)
-
-    def to_dict(self) -> dict:
-        """Convert the Generator entity to a dictionary."""
-        return {
-            "shift": self.shift,
-            "multiplier": self.multiplier,
-            "key": self.key,
-            "algorithm": self.algorithm,
-            "prefix": self.prefix,
-            "postfix": self.postfix,
-            "character_replacements": self.characters_replacements,
-        }
-
-    def from_dict(self, data: dict) -> None:
-        """Convert a dictionary to a Generator entity."""
-        for key, value in data.items():
-            if key in _default_properties or key == "characters_replacements":
-                setattr(self, key, value)

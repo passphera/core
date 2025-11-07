@@ -1,3 +1,4 @@
+import random
 from dataclasses import dataclass, field
 
 from cipherspy.cipher import (
@@ -134,4 +135,11 @@ class Generator:
         password: str = main_algorithm.encrypt(intermediate)
         for char, repl in self.characters_replacements.items():
             password = password.replace(char, repl)
-        return ''.join(c.upper() if c in text else c for c in password)
+        password_chars = list(password)
+        alpha_indices = [i for i, char in enumerate(password_chars) if char.isalpha()]
+        if alpha_indices:
+            num_to_upper = max(1, len(alpha_indices) // 2)
+            indices_to_upper = random.sample(alpha_indices, num_to_upper)
+            for i in indices_to_upper:
+                password_chars[i] = password_chars[i].upper()
+        return "".join(password_chars)
